@@ -14,11 +14,21 @@ contract CounterTest is Test {
 
     function test_Increment() public {
         counter.increment();
-        assertEq(counter.number(), 1);
+        (, uint256 number) = counter.data();
+        assertEq(number, 1);
+    }
+
+    function test_Increment_call() public {
+        counter.increment();
+        (bool success, bytes memory returnData) = address(counter).call(abi.encodeCall(counter.data, ()));
+        assertTrue(success);
+        Counter.Data memory data = abi.decode(returnData, (Counter.Data));
+        assertEq(data.number, 1);
     }
 
     function testFuzz_SetNumber(uint256 x) public {
         counter.setNumber(x);
-        assertEq(counter.number(), x);
+        (, uint256 number) = counter.data();
+        assertEq(number, x);
     }
 }
